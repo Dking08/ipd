@@ -1,9 +1,16 @@
 from scapy.all import Ether, ARP, sendp, get_if_hwaddr
 import time
 import socket
+import os
 
-DISCOVERY_IP = "10.255.255.255"   # marker IP used as beacon
-INTERVAL = 2                      # seconds between beacons
+DISCOVERY_IP = os.environ.get("DISCOVERY_IP", "10.255.255.255")
+
+# Optional runtime parameters via environment variables so frontends (TUI/CLI)
+# can configure behavior without changing this file's API.
+SRC_IP_ENV = os.environ.get("SRC_IP", "auto")
+SRC_MAC_ENV = os.environ.get("SRC_MAC", "00:11:22:33:44:55")
+INTERVAL = float(os.environ.get("INTERVAL", "5"))
+IFACE_ENV = os.environ.get("IFACE") or None
 
 
 def get_local_ip():
@@ -17,7 +24,7 @@ def get_local_ip():
 
 
 def main():
-    iface = None
+    iface = IFACE_ENV
     # try to auto-detect a reasonable interface (not loopback)
     from scapy.all import get_if_list
     candidates = [i for i in get_if_list() if i != "lo"]
